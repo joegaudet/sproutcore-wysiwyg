@@ -1,0 +1,134 @@
+@import "compass/css3";
+
+$theme.sc-view.sc-wysiwyg-view {
+	@include transition(box-shadow 0.15s ease-in-out, border-color 0.15s ease-in-out);
+	@include border-radius(5px);
+	background-color: #fefefe;
+	border: 1px solid #aaa;
+	
+	.sc-wysiwyg-editor {
+		@include border-bottom-radius(5px);
+		@include box-shadow(0 1px 5px rgba(black, 0.2) inset, 0px 0px 5px rgba(#64d1ff, 0));
+		border: none;
+		background: none;
+	}
+}
+
+body.sc-wysiwyg {
+	word-wrap:break-word;
+}
+
+$theme.sc-wysiwyg-text, body.sc-wysiwyg {
+	font-family: Helvetica, Arial, sans-serif;
+	color: #404040;
+	-webkit-font-smoothing: antialiased;
+	text-shadow: 1px 1px 1px rgba(0,0,0,0.004);
+	font-size: 18px;
+	line-height: 25px;
+	
+    a {
+        font-weight: bold;
+        color: #4182bf;
+        
+        &:hover {
+            color: #4182bf;
+            cursor: pointer;
+        }
+        
+        &:active {
+            color: #4182bf;
+            cursor: pointer;
+        }
+        
+        &:visited {
+            color: #4182bf; 
+        }
+    }
+	    
+	// markdown classes
+	* {
+		white-space: normal;
+	}
+	
+	em {
+		font-style: italic;
+	}
+	
+	h1 {
+		@extend .smoothed;
+		font-weight: bold;
+		font-size: 32px;
+	}
+
+	h2 {
+		@extend .smoothed;
+		font-weight: bold;
+		font-size: 28px;
+	}
+
+	h3 {
+		@extend .smoothed;
+		font-weight: bold;
+		font-size: 24px;
+	}
+
+	h4 {
+		@extend .smoothed;
+		font-weight: bold;
+		font-size: 20px;
+	}
+
+	h5 {
+		@extend .smoothed;
+		font-weight: bold;
+		font-size: 18px;
+	}
+
+	h6 {
+		@extend .smoothed;
+		font-weight: bold;
+		font-size: 14px;
+	}
+	
+	p {
+		margin-bottom: 15px;
+	}
+
+	pre {
+		margin-bottom: 10px;
+		overflow: auto;
+	}
+
+	ul {
+		list-style: disc outside none !important;
+		li {
+			list-style: disc outside none !important;
+		}
+	}
+
+	ol {
+		padding: 0px 0px 15px 40px;
+		margin-left: 8px !important;	
+		
+		li {
+			padding: 2px 2px 0px 2px;
+		}
+		
+		li:last-child {
+			padding: 2px 2px 2px 2px;
+		}
+	}
+
+	ul {
+		padding: 0px 0px 15px 40px;
+		margin: 0 0 0 0 !important;
+		
+		li {
+			padding: 2px 2px 0px 2px;
+		}
+		
+		li:last-child {
+			padding: 2px 2px 2px 2px;
+		}
+	}	
+}
