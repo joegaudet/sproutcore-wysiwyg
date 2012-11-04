@@ -18,7 +18,7 @@ body.sc-wysiwyg {
 	word-wrap:break-word;
 }
 
-$theme.sc-wysiwyg-text, body.sc-wysiwyg {
+$theme.sc-label-view.sc-wysiwyg-text, body.sc-wysiwyg {
 	font-family: Helvetica, Arial, sans-serif;
 	color: #404040;
 	-webkit-font-smoothing: antialiased;
@@ -90,7 +90,7 @@ $theme.sc-wysiwyg-text, body.sc-wysiwyg {
 		font-size: 14px;
 	}
 	
-	p {
+	p, div {
 		margin-bottom: 15px;
 	}
 
