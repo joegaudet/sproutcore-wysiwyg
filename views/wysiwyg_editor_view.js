@@ -30,14 +30,14 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 	 */
 	document: function() {
 		return this.$()[0].contentDocument;
-	}.property().cacheable(),
+	}.property(),
 
 	/**
 	 * Pointer to the document inside of the iFrame
 	 */
 	window: function() {
 		return this.$()[0].contentWindow;
-	}.property().cacheable(),
+	}.property(),
 
 	width: function() {
 		return this.get('frame').width;
@@ -125,9 +125,8 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 	},
 
 	iframeDidLoad: function() {
-
 		var doc = this.get('document');
-		docu = doc;
+		if (!doc) return;
 		doc.designMode = "on";
 		doc.execCommand("styleWithCSS", true, null);
 
@@ -161,11 +160,12 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 	 */
 	_setupEvents: function() {
 		// handle basic events
-		var doc = this.get('document'), window = this.get('window');
+		var window = this.get('window');
+
 		var responder = SC.RootResponder.responder;
 
 		// TODO: remove these to prevent memory leaks
-		responder.listenFor([ 'keydown', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'click', 'dblclick', 'mousemove', 'selectstart', 'contextmenu' ], doc);
+		responder.listenFor([ 'keydown', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'click', 'dblclick', 'mousemove', 'selectstart', 'contextmenu' ], window);
 
 		// focus wire up the focus
 		if (SC.browser.isIE8OrLower) {
@@ -215,7 +215,8 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 	},
 
 	queryCommandState: function(commandName) {
-		return this.get('document').queryCommandState(commandName);
+		var document = this.get('document');
+		return document && document.queryCommandState(commandName);
 	},
 
 	insertHtmlHtmlAtCaret: function(html) {
@@ -268,7 +269,8 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 		return YES;
 	},
 
-	// TODO: This is a mess.
+	// TODO: This is a mess -- needs to have more well partitioned
+	// responsibilities
 	keyUp: function(evt) {
 		var doc = this.get('document');
 		// we don't allow regular returns because they are
@@ -289,13 +291,12 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 		// based on doc size.
 		if (!this.get('useNativeScrolling')) {
 			// this could probably be done better
-			var lastNode = SC.$(docu.body).children().last();
+			var lastNode = SC.$(doc.body).children().last();
 			// if we've deleted all of those nodes. lets put the empty one
 			// in
 			if (lastNode.length === 0) {
 				SC.$(doc.body).html(this.get('carriageReturnText'));
-				lastNode = SC.$(docu.body).children().last();
-
+				lastNode = SC.$(doc.body).children().last();
 				this.domValueDidChange();
 			}
 			var calcHeight = lastNode.offset().top + lastNode.height();

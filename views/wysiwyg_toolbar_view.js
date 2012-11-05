@@ -14,6 +14,8 @@ SC.WYSIWYGToolbarView = SC.ToolbarView.extend(SC.FlowedLayout, {
 
 	anchorLocation: SC.ANCHOR_TOP,
 
+	buttonHeight: 24,
+
 	buttons: [ {
 		command: 'bold'
 	}, {
@@ -36,17 +38,16 @@ SC.WYSIWYGToolbarView = SC.ToolbarView.extend(SC.FlowedLayout, {
 		command: 'outdent'
 	} ],
 
-	childViews: [ 'imageButton' ],
+	childViews: [ 'embedButton', 'imageButton' ],
 
 	init: function() {
-		var self = this;
-		var childViews = this.childViews.copy();
+		var self = this, childViews = this.childViews.copy(), buttonHeight = self.get('buttonHeight');
 
 		// Add the default buttons
 		this.buttons.forEach(function(button) {
 			self[button.command] = SC.ButtonView.extend({
 				layout: {
-					height: 24,
+					height: buttonHeight,
 					width: 30,
 					centerY: 0
 				},
@@ -58,9 +59,11 @@ SC.WYSIWYGToolbarView = SC.ToolbarView.extend(SC.FlowedLayout, {
 			});
 			childViews.push(button.command);
 		});
-
 		this.childViews = childViews;
 		sc_super();
+
+		this.imageButton.adjust('height', buttonHeight);
+		this.styles.adjust('height', buttonHeight);
 	},
 
 	buttonPressed: function(button) {
