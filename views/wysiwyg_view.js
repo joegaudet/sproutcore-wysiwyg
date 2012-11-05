@@ -2,12 +2,15 @@ SC.WYSIWYGView = SC.View.extend({
 
 	classNames: 'sc-wysiwyg-view',
 
+	editorHasFirstResponderBinding: SC.Binding.oneWay('editor.contentView.isFirstResponder'),
+
+	classNamesBinding: [ 'editorHasFirstResponder:focus' ],
+
 	childViews: [ 'toolbar', 'editor' ],
 
 	isTextSelectable: YES,
 
 	value: '',
-
 
 	toolbar: SC.WYSIWYGToolbarView.extend({
 		editor: SC.outlet('parentView.editor.contentView')
@@ -34,6 +37,7 @@ SC.WYSIWYGView = SC.View.extend({
 			// TODO: FIX THIS SO IT WORKS SANELY
 			keyUp: function() {
 				var ret = sc_super();
+
 				var $node = SC.$(this.get('document').getSelection().anchorNode.parentNode);
 				var position = $node.position();
 				this.getPath('parentView.parentView').scrollTo(0, position.top + $node.height());

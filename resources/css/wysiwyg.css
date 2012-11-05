@@ -18,7 +18,12 @@ body.sc-wysiwyg {
 	word-wrap:break-word;
 }
 
+$theme.sc-toolbar-view {
+	@include border-top-radius(5px);
+}
+
 $theme.sc-label-view.sc-wysiwyg-text, body.sc-wysiwyg {
+	word-wrap:break-word;
 	font-family: Helvetica, Arial, sans-serif;
 	color: #404040;
 	-webkit-font-smoothing: antialiased;

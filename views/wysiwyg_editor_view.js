@@ -1,7 +1,7 @@
 SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 
 	acceptsFirstResponder: YES,
-	
+
 	classNames: 'sc-wysiwyg-editor',
 
 	attributeBindings: [ 'frameborder', 'width', 'height', 'scrolling' ],
@@ -9,6 +9,8 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 	tagName: 'iframe',
 
 	frameborder: 0,
+
+	_updateStyles: NO,
 
 	/**
 	 * Whether or not this view uses native scrolling
@@ -44,6 +46,33 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 	height: function() {
 		return this.get('frame').height;
 	}.property('frame').cacheable(),
+
+	/**
+	 * 
+	 */
+	isBold: function() {
+		return this.queryCommandState('bold');
+	}.property('_updateStyles'),
+
+	isItalic: function() {
+		return this.queryCommandState('italic');
+	}.property('_updateStyles'),
+
+	isUnderline: function() {
+		return this.queryCommandState('underline');
+	}.property('_updateStyles'),
+
+	isJustifyleft: function() {
+		return this.queryCommandState('justifyleft');
+	}.property('_updateStyles'),
+
+	isJustifycenter: function() {
+		return this.queryCommandState('justifycenter');
+	}.property('_updateStyles'),
+
+	isJustifyright: function() {
+		return this.queryCommandState('justifyright');
+	}.property('_updateStyles'),
 
 	/**
 	 * On create of the layer we bind to the iframe load event so we can set up
@@ -88,6 +117,13 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 		return value;
 	}.property().idempotent(),
 
+	domValueDidChange: function() {
+		// get the value from the inner document
+		this._changeByEditor = true;
+		this.set('value', this.get('document').body.innerHTML);
+		this.notifyPropertyChange('_updateStyles');
+	},
+
 	iframeDidLoad: function() {
 
 		var doc = this.get('document');
@@ -111,9 +147,10 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 			}
 		}
 
-		// lets either insert the value on init or some placeholder
-		// text
-		this.$(doc.body).append(this.get('value'));
+		// load the intial value and select the first shild
+		var $body = this.$(doc.body);
+		$body.append(this.get('value'));
+		this._selectElement($body.children().first());
 
 		this._setupEvents();
 	},
@@ -132,8 +169,8 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 
 		// focus wire up the focus
 		if (SC.browser.isIE8OrLower) {
-			SC.Event.add(doc.body, 'focusin', this, this.focus);
-			SC.Event.add(doc.body, 'focusin', this, this.blur);
+			SC.Event.add(window, 'focusin', this, this.focus);
+			SC.Event.add(window, 'focusin', this, this.blur);
 		} else {
 			SC.Event.add(window, 'focus', this, this.focus);
 			SC.Event.add(window, 'blur', this, this.blur);
@@ -141,26 +178,24 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 	},
 
 	_teardownEvents: function() {
-		var doc = this.get('document');
+		var window = this.get('window');
 
 		// focus wire up the focus
 		if (SC.browser.isIE8OrLower) {
-			SC.Event.remove(doc.body, 'focusin', this, this.focus);
-			SC.Event.remove(doc.body, 'focusin', this, this.blur);
+			SC.Event.remove(window, 'focusin', this, this.focus);
+			SC.Event.remove(window, 'focusin', this, this.blur);
 		} else {
-			SC.Event.remove(doc.body, 'focus', this, this.focus);
-			SC.Event.remove(doc.body, 'blur', this, this.blur);
+			SC.Event.remove(window, 'focus', this, this.focus);
+			SC.Event.remove(window, 'blur', this, this.blur);
 		}
 	},
 
 	focus: function() {
 		this.becomeFirstResponder();
-		// this.get('pane').makeFirstResponder(this);
 	},
 
 	blur: function() {
 		this.resignFirstResponder();
-		// this.get('pane').makeFirstResponder(null);
 	},
 
 	/**
@@ -175,8 +210,12 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 	 * @param value
 	 */
 	execCommand: function(commandName, showDefaultUI, value) {
-		SC.debug("Exec Command: " + commandName);
 		this.get('document').execCommand(commandName, showDefaultUI, value);
+		this.domValueDidChange();
+	},
+
+	queryCommandState: function(commandName) {
+		return this.get('document').queryCommandState(commandName);
 	},
 
 	insertHtmlHtmlAtCaret: function(html) {
@@ -201,18 +240,17 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 					sel.removeAllRanges();
 					sel.addRange(range);
 				}
+
+				this.domValueDidChange();
 			}
 		} else if (document.selection && document.selection.type != "Control") {
 			document.selection.createRange().pasteHTML(html);
+			this.domValueDidChange();
 		}
 	},
 
-	didBecomeFirstResponder: function(responder) {
-
-	},
-
-	willLoseFirstResponder: function(responder) {
-
+	insertImage: function(url) {
+		this.insertHtmlHtmlAtCaret('<img src="%@" width="100%" height="auto" />'.fmt(url));
 	},
 
 	mouseWheel: function(evt) {
@@ -226,22 +264,26 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 
 	mouseUp: function(evt) {
 		evt.allowDefault();
+		this.notifyPropertyChange('_updateStyles');
 		return YES;
 	},
 
+	// TODO: This is a mess.
 	keyUp: function(evt) {
 		var doc = this.get('document');
 		// we don't allow regular returns because they are
 		// divs we want paragraphs
 		if (evt.keyCode === SC.Event.KEY_RETURN) {
-			// this needs fixing.
-			var el = this._formatElement($(doc.getSelection().anchorNode), 'p');
-			this._selectElement(el);
+			var node = doc.getSelection().anchorNode;
+			// if this carriage return inserted a div
+			// lets reformat it to a paragraph
+			if (node.nodeName === "DIV") {
+				var el = this._formatElement($(node), 'p');
+				this._selectElement(el);
+			}
 		}
 
-		// get the value from the inner document
-		this._changeByEditor = true;
-		this.set('value', doc.body.innerHTML);
+		this.domValueDidChange();
 
 		// if we don't use native scrolling we need to update the frame size
 		// based on doc size.
@@ -253,11 +295,13 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 			if (lastNode.length === 0) {
 				SC.$(doc.body).html(this.get('carriageReturnText'));
 				lastNode = SC.$(docu.body).children().last();
+
+				this.domValueDidChange();
 			}
 			var calcHeight = lastNode.offset().top + lastNode.height();
 			this.adjust('height', Math.max(calcHeight, this.get('minHeight')));
 		}
-
+		this.notifyPropertyChange('_updateStyles');
 		evt.allowDefault();
 
 		return YES;

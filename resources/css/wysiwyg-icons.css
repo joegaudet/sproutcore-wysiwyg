@@ -1,0 +1,72 @@
+@import "compass/css3";
+
+
+$theme.sc-wysiwyg-toolbar {
+
+	.bold {
+		width: 12px;
+		height: 15px;
+		@include slice("../images/icons/bold.png");
+	}
+	
+	.italic {
+		width: 9px;
+		height: 15px;
+		@include slice("../images/icons/italic.png");
+	}
+	
+	.underline {
+		width: 13px;
+		height: 15px;
+		@include slice("../images/icons/text_underline.png");
+	}
+	
+	.insertorderedlist {
+		width: 15px;
+		height: 14px;
+		@include slice("../images/icons/list.png");
+
+	}
+
+	.insertunorderedlist {
+		width: 15px;
+		height: 14px;
+		@include slice("../images/icons/list.png");		
+	}
+
+	.justifyleft {
+		width: 15px;
+		height: 14px;
+		@include slice("../images/icons/align_left.png");
+	}
+
+	.justifycenter {
+		width: 15px;
+		height: 14px;
+		@include slice("../images/icons/align_center.png");
+	}
+
+	.justifyright{
+		width: 15px;
+		height: 14px;
+		@include slice("../images/icons/align_right.png");
+	}
+	
+	.indent {
+		width: 15px;
+		height: 14px;
+		@include slice("../images/icons/left_indent.png");
+	}
+	
+	.outdent{
+		width: 15px;
+		height: 14px;
+		@include slice("../images/icons/right_indent.png");
+	}
+	
+	.insert-image {
+		width: 15px;
+		height: 13px;
+		@include slice("../images/icons/picture.png");
+	}
+}

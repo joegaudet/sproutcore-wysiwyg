@@ -1,5 +1,7 @@
 SC.WYSIWYGToolbarView = SC.ToolbarView.extend(SC.FlowedLayout, {
 
+	classNames: 'sc-wysiwyg-toolbar',
+
 	flowPadding: {
 		top: 4,
 		left: 4,
@@ -13,34 +15,24 @@ SC.WYSIWYGToolbarView = SC.ToolbarView.extend(SC.FlowedLayout, {
 	anchorLocation: SC.ANCHOR_TOP,
 
 	buttons: [ {
-		title: 'B',
 		command: 'bold'
 	}, {
-		title: 'I',
 		command: 'italic'
 	}, {
-		title: 'U',
 		command: 'underline'
 	}, {
-		title: 'OL',
 		command: 'insertorderedlist'
 	}, {
-		title: 'UL',
 		command: 'insertunorderedlist'
 	}, {
-		title: 'JL',
 		command: 'justifyleft'
 	}, {
-		title: 'JC',
 		command: 'justifycenter'
 	}, {
-		title: 'JR',
 		command: 'justifyright'
 	}, {
-		title: 'ID',
 		command: 'indent'
 	}, {
-		title: 'OD',
 		command: 'outdent'
 	} ],
 
@@ -58,10 +50,11 @@ SC.WYSIWYGToolbarView = SC.ToolbarView.extend(SC.FlowedLayout, {
 					width: 30,
 					centerY: 0
 				},
-				title: button.title,
+				icon: button.command,
 				command: button.command,
 				action: 'buttonPressed',
-				target: self
+				target: self,
+				isDefaultBinding: SC.Binding.oneWay('.parentView.editor.is' + button.command.titleize())
 			});
 			childViews.push(button.command);
 		});
@@ -75,7 +68,34 @@ SC.WYSIWYGToolbarView = SC.ToolbarView.extend(SC.FlowedLayout, {
 	},
 
 	insertImage: function() {
-		this.get('editor').insertHtmlHtmlAtCaret('<img src="http://start.matygo.com/images/joe.jpg" />');
+		var self = this;
+		var pane = SC.PickerPane.create({
+			layout: {
+				width: 220,
+				height: 40
+			},
+			pointerPos: 'perfectTop',
+			contentView: SC.View.extend({
+				childViews: [ 'textArea' ],
+				textArea: SC.TextFieldView.extend({
+					hint: 'Image Url',
+					layout: {
+						top: 5,
+						right: 5,
+						bottom: 5,
+						left: 5
+					},
+					insertNewline: function() {
+						self.performImageInsert(this.get('value'));
+						pane.remove();
+					}
+				})
+			})
+		}).popup(this.get('imageButton'), SC.PICKER_POINTER, [ 2, 0, 1, 3, 2 ]);
+	},
+
+	performImageInsert: function(url) {
+		this.get('editor').insertImage(url);
 	},
 
 	imageButton: SC.ButtonView.extend({
@@ -84,7 +104,7 @@ SC.WYSIWYGToolbarView = SC.ToolbarView.extend(SC.FlowedLayout, {
 			width: 30,
 			centerY: 0
 		},
-		title: 'II',
+		icon: 'insert-image',
 		action: 'insertImage',
 		target: SC.outlet('parentView')
 	}),
