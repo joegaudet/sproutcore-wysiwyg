@@ -4,7 +4,7 @@ SC.WYSIWYGToolbarView = SC.ToolbarView.extend(SC.FlowedLayout, {
 
 	wysiwygView: null,
 
-	buttons: [ 'styles', 'insertImage', 'embed', 'bold', 'italic', 'underline', 'insertOrderedList', 'insertUnorderedList', 'justifyLeft', 'justifyCenter', 'justifyRight', 'indent', 'outdent' ],
+	buttons: [ 'styles', 'insertImage', 'embed', 'link', 'bold', 'italic', 'underline', 'insertOrderedList', 'insertUnorderedList', 'justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull', 'indent', 'outdent' ],
 
 	flowPadding: {
 		top: 4,
@@ -31,7 +31,7 @@ SC.WYSIWYGToolbarView = SC.ToolbarView.extend(SC.FlowedLayout, {
 		// Add the default buttons
 
 		this.buttons.forEach(function(button) {
-			var buttonClass = self[button], command = SproutcoreWysiwyg.commands[button];
+			var buttonClass = self[button], command = SproutCoreWysiwyg.commands[button];
 
 			if (!buttonClass) buttonClass = SC.ButtonView;
 
@@ -41,12 +41,12 @@ SC.WYSIWYGToolbarView = SC.ToolbarView.extend(SC.FlowedLayout, {
 						height: buttonHeight,
 						width: 30
 					},
-					icon: command.icon,
+					icon: command.get('icon'),
 					command: command,
-					toolTip: command.toolTip,
+					toolTip: command.get('toolTip'),
 					action: 'executeCommand',
 					target: SC.outlet('parentView.wysiwygView'),
-					keyEquivalent: command.keyEquivalent,
+					keyEquivalent: command.get('keyEquivalent'),
 					isSelectedBinding: SC.Binding.oneWay('.parentView.is' + button.capitalize())
 				});
 			}
@@ -57,36 +57,55 @@ SC.WYSIWYGToolbarView = SC.ToolbarView.extend(SC.FlowedLayout, {
 	},
 
 	styles: SC.SelectView.extend({
+
+		/**
+		 * Prevent this field from stealing focus from the toolber
+		 */
+		acceptsFirstResponder: NO,
+
+		isDefaultPosition: YES,
+
 		layout: {
 			width: 120,
 			height: 24
 		},
+
 		itemTitleKey: 'title',
 		itemValueKey: 'value',
-		items: [ {
-			title: 'Paragraph',
-			value: '<P>'
-		}, {
-			title: 'Heading 1',
-			value: '<H1>'
-		}, {
-			title: 'Heading 2',
-			value: '<H2>'
-		}, {
-			title: 'Heading 3',
-			value: '<H3>'
-		}, {
-			title: 'Heading 4',
-			value: '<H4>'
-		}, {
-			title: 'Heading 5',
-			value: '<H5>'
-		}, {
-			title: 'Heading 6',
-			value: '<H6>'
-		} ].map(function(values) {
+
+		items: SproutCoreWysiwyg.styles.map(function(values) {
 			return SC.Object.create(values);
-		})
+		}),
+
+		escapeHTML: NO,
+
+		currentStyleBinding: SC.Binding.oneWay('.parentView.currentStyle'),
+		currenStyleDidChange: function() {
+			this._ignoreChange = true;
+			this.set('value', this.get('currentStyle'));
+		}.observes('currentStyle'),
+
+		valueDidChange: function() {
+			var value = this.get('value');
+			if (value && !this._ignoreChange) {
+				this.command = {
+					action: 'formatBlock',
+					argument: '<%@>'.fmt(value.toUpperCase())
+				};
+				this.getPath('parentView.wysiwygView').executeCommand(this);
+			}
+			this._ignoreChange = false;
+		}.observes('value'),
+
+		exampleView: SC.MenuItemView.extend({
+			escapeHTML: NO,
+			classNames: 'sc-wysiwyg-menu-item'
+		}),
+
+		_action: function() {
+			sc_super();
+			this.menu.adjust('width', 190);
+		}
 	})
 
 });

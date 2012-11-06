@@ -47,6 +47,12 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 
 	carriageReturnText: '<p><br /></p>',
 
+	init: function() {
+		sc_super();
+		this._value = this.get('carriageReturnText');
+		editor = this;
+	},
+
 	/**
 	 * Pointer to the document inside of the iFrame
 	 */
@@ -92,6 +98,15 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 	isJustifyRight: function() {
 		return this.queryCommandState('justifyright');
 	}.property('_updateStyles'),
+	
+	isJustifyFull: function() {
+		return this.queryCommandState('justifyFull');
+	}.property('_updateStyles'),
+
+	currentStyle: function() {
+		var style = this.queryCommandValue('formatBlock');
+		return style ? style : 'p';
+	}.property('_updateStyles'),
 
 	/**
 	 * On create of the layer we bind to the iframe load event so we can set up
@@ -111,11 +126,6 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 	_value: '',
 
 	_changeByEditor: false,
-
-	init: function() {
-		sc_super();
-		this._value = this.get('carriageReturnText');
-	},
 
 	value: function(key, value) {
 		if (value !== undefined) {
@@ -182,6 +192,7 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 	iframeDidLoad: function(evt) {
 		var doc = this.get('document');
 		if (!doc) return;
+		docu = doc;
 		doc.designMode = "on";
 		doc.execCommand("styleWithCSS", true, null);
 
@@ -227,6 +238,7 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 	// TODO: This is a mess -- needs to have more well partitioned
 	// responsibilities
 	keyUp: function(evt) {
+
 		var doc = this.get('document');
 		// we don't allow regular returns because they are
 		// divs we want paragraphs
@@ -302,6 +314,17 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 	queryCommandState: function(commandName) {
 		var document = this.get('document');
 		return document && document.queryCommandState(commandName);
+	},
+	/**
+	 * Determines whether or not a commandHasBeen executed at the current
+	 * selection.
+	 * 
+	 * @param commandName
+	 * @returns {Boolean}
+	 */
+	queryCommandValue: function(commandName) {
+		var document = this.get('document');
+		return document && document.queryCommandValue(commandName);
 	},
 
 	insertHtmlHtmlAtCaret: function(html) {

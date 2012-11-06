@@ -1,9 +1,9 @@
 // ==========================================================================
-// Framework:   SproutcoreWysiwyg
+// Framework:   SproutCoreWysiwyg
 // Copyright: @2012 Joe Gaudet - joe@learndot.com.
 // ==========================================================================
 /*globals SC */
-
+sc_require('wysiwyg_command');
 /**
  * @namespace
  * 
@@ -11,7 +11,7 @@
  * 
  * @extends SC.Object
  */
-SproutcoreWysiwyg = SC.Object.create(
+SproutCoreWysiwyg = SC.Object.create(
 /** @scope SproutcoreWysiwyg.prototype */
 {
 
@@ -19,83 +19,111 @@ SproutcoreWysiwyg = SC.Object.create(
 	VERSION: '0.1.0',
 
 	commands: {
-		insertImage: {
+		insertImage: SC.WYSIWYGCommand.create({
 			action: 'insertImage',
-			icon: 'insert-image',
-			toolTip: 'Insert Image',
+			extendedCommand: true
+		}),
+
+		embed: SC.WYSIWYGCommand.create({
+			action: 'embed',
 			keyEquivalent: '',
 			extendedCommand: true
-		},
+		}),
 
-		embed: {
-			action: 'embed',
-			icon: 'embed',
-			toolTip: 'Embed',
-			keyEquivalent: ''
-		},
+		link: SC.WYSIWYGCommand.create({
+			action: 'createLink',
+			toolTip: 'Insert a link',
+			keyEquivalent: 'ctrl_l',
+			extendedCommand: true
+		}),
 
-		bold: {
+		bold: SC.WYSIWYGCommand.create({
 			action: 'bold',
-			icon: 'bold',
 			toolTip: 'Bold text',
 			keyEquivalent: 'ctrl_b'
-		},
+		}),
 
-		italic: {
+		italic: SC.WYSIWYGCommand.create({
 			action: 'italic',
-			icon: 'italic',
 			toolTip: 'Italicize text',
 			keyEquivalent: 'ctrl_i'
-		},
+		}),
 
-		underline: {
+		underline: SC.WYSIWYGCommand.create({
 			action: 'underline',
-			icon: 'underline',
 			toolTip: 'Underline text',
 			keyEquivalent: 'ctrl_u'
-		},
+		}),
 
-		insertOrderedList: {
-			action: 'insertorderedlist',
-			icon: 'insert-ordered-list',
+		insertOrderedList: SC.WYSIWYGCommand.create({
+			action: 'insertOrderedList',
 			toolTip: 'Insert an ordered list'
-		},
+		}),
 
-		insertUnorderedList: {
-			action: 'insertunorderedlist',
-			icon: 'insert-unordered-list',
+		insertUnorderedList: SC.WYSIWYGCommand.create({
+			action: 'insertUnorderedList',
 			toolTip: 'Insert an unordered list'
-		},
+		}),
 
-		justifyLeft: {
-			action: 'justifyleft',
-			icon: 'justify-left',
+		justifyLeft: SC.WYSIWYGCommand.create({
+			action: 'justifyLeft',
 			toolTip: 'Left justify text',
 			keyEquivalent: 'ctrl_['
-		},
+		}),
 
-		justifyCenter: {
-			action: 'justifycenter',
-			icon: 'justify-center',
+		justifyCenter: SC.WYSIWYGCommand.create({
+			action: 'justifyCenter',
 			toolTip: 'Center justify text',
 			keyEquivalent: 'ctrl_\\'
-		},
+		}),
 
-		justifyRight: {
-			action: 'justifyright',
-			icon: 'justify-right',
+		justifyRight: SC.WYSIWYGCommand.create({
+			action: 'justifyRight',
 			toolTip: 'Right justify text',
 			keyEquivalent: 'ctrl_]'
-		},
+		}),
 
-		indent: {
-			action: 'indent',
-			icon: 'indent',
-		},
+		justifyFull: SC.WYSIWYGCommand.create({
+			action: 'justifyFull',
+			toolTip: 'Justify text'
+		}),
 
-		outdent: {
-			action: 'outdent',
-			icon: 'outdent',
-		}
-	}
+		indent: SC.WYSIWYGCommand.create({
+			action: 'indent'
+		}),
+
+		outdent: SC.WYSIWYGCommand.create({
+			action: 'outdent'
+		})
+	},
+
+	styles: [ {
+		title: 'Paragraph',
+		value: 'p',
+		height: 20
+	}, {
+		title: '<h1>Heading 1</h1>',
+		value: 'h1',
+		height: 40
+	}, {
+		title: '<h2>Heading 2</h2>',
+		value: 'h2',
+		height: 35
+	}, {
+		title: '<h3>Heading 3</h3>',
+		value: 'h3',
+		height: 35
+	}, {
+		title: '<h4>Heading 4</h4>',
+		value: 'h4',
+		height: 30
+	}, {
+		title: '<h5>Heading 5</h5>',
+		value: 'h5',
+		height: 24
+	}, {
+		title: '<h6>Heading 6</h6>',
+		value: 'h6',
+		height: 20
+	} ]
 });

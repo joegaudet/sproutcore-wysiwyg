@@ -40,6 +40,12 @@ $theme.sc-wysiwyg-toolbar {
 		@include slice("../images/icons/align_left.png");
 	}
 
+	.justify-full {
+		width: 15px;
+		height: 14px;
+		@include slice("../images/icons/justify.png");
+	}
+
 	.justify-center {
 		width: 15px;
 		height: 14px;
@@ -75,4 +81,11 @@ $theme.sc-wysiwyg-toolbar {
 		height: 9px;
 		@include slice("../images/icons/embed.png");
 	}
+	
+	.create-link {
+		width: 14px;
+		height: 14px;
+		@include slice("../images/icons/link.png");
+	}
+
 }

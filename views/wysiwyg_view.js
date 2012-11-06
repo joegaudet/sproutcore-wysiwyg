@@ -63,20 +63,60 @@ SC.WYSIWYGView = SC.View.extend({
 	executeCommand: function(source) {
 		var command = source.get('command');
 		if (!command.extendedCommand) {
-			this.get('editor').execCommand(command.action, false, null);
+			this.get('editor').execCommand(command.action, false, command.argument || null);
 		} else {
 			this[command.action](source, command);
 		}
 	},
 
-	insertImage: function(button, command) {
-		this.insertImagePopup.create({
+	_popup: function(anchor, popup) {
+		popup.create({
 			wysiwyg: this
-		}).popup(button, SC.PICKER_POINTER, [ 2, 0, 1, 3, 2 ]);
+		}).popup(anchor, SC.PICKER_POINTER, [ 2, 0, 1, 3, 2 ]);
+	},
+
+	createLink: function(button, commabnd) {
+		this._popup(button, this.createLinkPopup);
+	},
+
+	createLinkPopup: SC.PickerPane.extend({
+		layout: {
+			width: 220,
+			height: 40
+		},
+		wysiwyg: null,
+		pointerPos: 'perfectTop',
+		contentView: SC.View.extend({
+			childViews: [ 'url' ],
+			url: SC.TextFieldView.extend({
+				hint: 'Link Url',
+				layout: {
+					top: 5,
+					right: 5,
+					bottom: 5,
+					left: 5
+				},
+				insertNewline: function() {
+					var pane = this.get('pane');
+					pane.get('wysiwyg').performLink(this.get('value'));
+					pane.remove();
+				}
+			})
+		})
+	}),
+
+	performLink: function(url) {
+		if (url) {
+			this.get('editor').execCommand('createLink', false, url);
+		}
+	},
+
+	insertImage: function(button, command) {
+		this._popup(button, this.insertImagePopup);
 	},
 
 	performImageInsert: function(url) {
-		this.get('editor').insertImage(url);
+		this.get('editor').execCommand('insertImage', false, url);
 	},
 
 	insertImagePopup: SC.PickerPane.extend({
@@ -131,6 +171,7 @@ SC.WYSIWYGView = SC.View.extend({
 		isJustifyLeftBinding: SC.Binding.oneWay('.wysiwygView.editor.isJustifyLeft'),
 		isJustifyCenterBinding: SC.Binding.oneWay('.wysiwygView.editor.isJustifyCenter'),
 		isJustifyRightBinding: SC.Binding.oneWay('.wysiwygView.editor.isJustifyRight'),
+		currentStyleBinding: SC.Binding.oneWay('.wysiwygView.editor.currentStyle'),
 	}),
 
 	/**
