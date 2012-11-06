@@ -21,32 +21,32 @@ $theme.sc-wysiwyg-toolbar {
 		@include slice("../images/icons/text_underline.png");
 	}
 	
-	.insertorderedlist {
+	.insert-ordered-list {
 		width: 15px;
 		height: 14px;
 		@include slice("../images/icons/list.png");
 
 	}
 
-	.insertunorderedlist {
+	.insert-unordered-list {
 		width: 15px;
 		height: 14px;
 		@include slice("../images/icons/list.png");		
 	}
 
-	.justifyleft {
+	.justify-left {
 		width: 15px;
 		height: 14px;
 		@include slice("../images/icons/align_left.png");
 	}
 
-	.justifycenter {
+	.justify-center {
 		width: 15px;
 		height: 14px;
 		@include slice("../images/icons/align_center.png");
 	}
 
-	.justifyright{
+	.justify-right{
 		width: 15px;
 		height: 14px;
 		@include slice("../images/icons/align_right.png");
@@ -68,5 +68,11 @@ $theme.sc-wysiwyg-toolbar {
 		width: 15px;
 		height: 13px;
 		@include slice("../images/icons/picture.png");
+	}
+	
+	.embed {
+		width: 19px;
+		height: 9px;
+		@include slice("../images/icons/embed.png");
 	}
 }

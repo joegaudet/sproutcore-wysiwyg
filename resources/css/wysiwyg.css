@@ -2,13 +2,19 @@
 
 $theme.sc-view.sc-wysiwyg-view {
 	@include transition(box-shadow 0.15s ease-in-out, border-color 0.15s ease-in-out);
+	@include box-shadow(0px 0px 5px rgba(#00cdf5, 0));
 	@include border-radius(5px);
 	background-color: #fefefe;
 	border: 1px solid #aaa;
 	
+	&.focus {
+		@include box-shadow(0px 0px 5px rgba(#0059e0, 1));
+		border-color: #0059e0;
+	}
+	
 	.sc-wysiwyg-editor {
 		@include border-bottom-radius(5px);
-		@include box-shadow(0 1px 5px rgba(black, 0.2) inset, 0px 0px 5px rgba(#64d1ff, 0));
+		@include box-shadow(0 1px 5px rgba(black, 0.2) inset);
 		border: none;
 		background: none;
 	}

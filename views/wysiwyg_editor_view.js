@@ -1,4 +1,26 @@
-SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
+// ==========================================================================
+// Framework:   SproutcoreWysiwyg
+// Copyright: @2012 Joe Gaudet - joe@learndot.com.
+// ==========================================================================
+/*globals SC */
+
+/**
+ * @class
+ * 
+ * View class responsible for encapsulating the RTE editor built into modern
+ * browsers.
+ * 
+ * https://developer.mozilla.org/en-US/docs/Rich-Text_Editing_in_Mozilla
+ * http://msdn.microsoft.com/en-us/library/ms536419(v=vs.85).aspx
+ * https://dvcs.w3.org/hg/editing/raw-file/tip/editing.html
+ * 
+ * @extends SC.View
+ * @extends SC.Control
+ * @author Joe Gaudet - joe@learndot.com
+ */
+SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
+/** @scope SC.WYSIWYGEditorView.prototype */
+{
 
 	acceptsFirstResponder: YES,
 
@@ -47,9 +69,6 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 		return this.get('frame').height;
 	}.property('frame').cacheable(),
 
-	/**
-	 * 
-	 */
 	isBold: function() {
 		return this.queryCommandState('bold');
 	}.property('_updateStyles'),
@@ -62,15 +81,15 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 		return this.queryCommandState('underline');
 	}.property('_updateStyles'),
 
-	isJustifyleft: function() {
+	isJustifyLeft: function() {
 		return this.queryCommandState('justifyleft');
 	}.property('_updateStyles'),
 
-	isJustifycenter: function() {
+	isJustifyCenter: function() {
 		return this.queryCommandState('justifycenter');
 	}.property('_updateStyles'),
 
-	isJustifyright: function() {
+	isJustifyRight: function() {
 		return this.queryCommandState('justifyright');
 	}.property('_updateStyles'),
 
@@ -124,36 +143,6 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 		this.notifyPropertyChange('_updateStyles');
 	},
 
-	iframeDidLoad: function() {
-		var doc = this.get('document');
-		if (!doc) return;
-		doc.designMode = "on";
-		doc.execCommand("styleWithCSS", true, null);
-
-		// find the style sheet for this frame, and mess
-		// with it.
-		var sheets = document.styleSheets;
-		for ( var i = 0; i < sheets.length; i++) {
-			var sheet = sheets[i];
-			if (sheet.href && sheet.href.match(/wysiwyg/)) {
-				var cssLink = doc.createElement("link");
-				cssLink.href = sheet.href;
-				cssLink.rel = "stylesheet";
-				cssLink.type = "text/css";
-				doc.head.appendChild(cssLink);
-				doc.body.className = "sc-wysiwyg";
-				break;
-			}
-		}
-
-		// load the intial value and select the first shild
-		var $body = this.$(doc.body);
-		$body.append(this.get('value'));
-		this._selectElement($body.children().first());
-
-		this._setupEvents();
-	},
-
 	/**
 	 * We need to attach the iFrame to the RootResponder for maximum SC
 	 * compatibility sexiness
@@ -190,68 +179,34 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 		}
 	},
 
-	focus: function() {
-		this.becomeFirstResponder();
-	},
+	iframeDidLoad: function(evt) {
+		var doc = this.get('document');
+		if (!doc) return;
+		doc.designMode = "on";
+		doc.execCommand("styleWithCSS", true, null);
 
-	blur: function() {
-		this.resignFirstResponder();
-	},
-
-	/**
-	 * Executes a command against the iFrame:
-	 * 
-	 * https://developer.mozilla.org/en-US/docs/Rich-Text_Editing_in_Mozilla
-	 * http://msdn.microsoft.com/en-us/library/ms536419(v=vs.85).aspx
-	 * https://dvcs.w3.org/hg/editing/raw-file/tip/editing.html
-	 * 
-	 * @param commandName
-	 * @param showDefaultUI
-	 * @param value
-	 */
-	execCommand: function(commandName, showDefaultUI, value) {
-		this.get('document').execCommand(commandName, showDefaultUI, value);
-		this.domValueDidChange();
-	},
-
-	queryCommandState: function(commandName) {
-		var document = this.get('document');
-		return document && document.queryCommandState(commandName);
-	},
-
-	insertHtmlHtmlAtCaret: function(html) {
-		var document = this.get('document'), window = this.get('window'), sel, range;
-		if (document.getSelection) {
-			sel = window.getSelection();
-			if (sel.getRangeAt && sel.rangeCount) {
-				range = sel.getRangeAt(0);
-				range.deleteContents();
-				var el = document.createElement("div");
-				el.innerHTML = html;
-				var frag = document.createDocumentFragment(), node = null, lastNode = null;
-				while (node = el.firstChild) {
-					lastNode = frag.appendChild(node);
-				}
-				range.insertNode(frag);
-
-				if (lastNode) {
-					range = range.cloneRange();
-					range.setStartAfter(lastNode);
-					range.collapse(true);
-					sel.removeAllRanges();
-					sel.addRange(range);
-				}
-
-				this.domValueDidChange();
+		// find the style sheet for this frame, and mess
+		// with it.
+		var sheets = document.styleSheets;
+		for ( var i = 0; i < sheets.length; i++) {
+			var sheet = sheets[i];
+			if (sheet.href && sheet.href.match(/wysiwyg/)) {
+				var cssLink = doc.createElement("link");
+				cssLink.href = sheet.href;
+				cssLink.rel = "stylesheet";
+				cssLink.type = "text/css";
+				doc.head.appendChild(cssLink);
+				doc.body.className = "sc-wysiwyg";
+				break;
 			}
-		} else if (document.selection && document.selection.type != "Control") {
-			document.selection.createRange().pasteHTML(html);
-			this.domValueDidChange();
 		}
-	},
 
-	insertImage: function(url) {
-		this.insertHtmlHtmlAtCaret('<img src="%@" width="100%" height="auto" />'.fmt(url));
+		// load the intial value and select the first shild
+		var $body = this.$(doc.body);
+		$body.append(this.get('value'));
+		this._selectElement($body.children().first());
+
+		this._setupEvents();
 	},
 
 	mouseWheel: function(evt) {
@@ -311,6 +266,77 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control, {
 	keyDown: function(evt) {
 		evt.allowDefault();
 		return YES;
+	},
+
+	focus: function() {
+		this.becomeFirstResponder();
+	},
+
+	blur: function() {
+		this.resignFirstResponder();
+	},
+
+	/**
+	 * Executes a command against the iFrame:
+	 * 
+	 * https://developer.mozilla.org/en-US/docs/Rich-Text_Editing_in_Mozilla
+	 * http://msdn.microsoft.com/en-us/library/ms536419(v=vs.85).aspx
+	 * https://dvcs.w3.org/hg/editing/raw-file/tip/editing.html
+	 * 
+	 * @param commandName
+	 * @param showDefaultUI
+	 * @param value
+	 */
+	execCommand: function(commandName, showDefaultUI, value) {
+		this.get('document').execCommand(commandName, showDefaultUI, value);
+		this.domValueDidChange();
+	},
+
+	/**
+	 * Determines whether or not a commandHasBeen executed at the current
+	 * selection.
+	 * 
+	 * @param commandName
+	 * @returns {Boolean}
+	 */
+	queryCommandState: function(commandName) {
+		var document = this.get('document');
+		return document && document.queryCommandState(commandName);
+	},
+
+	insertHtmlHtmlAtCaret: function(html) {
+		var document = this.get('document'), window = this.get('window'), sel, range;
+		if (document.getSelection) {
+			sel = window.getSelection();
+			if (sel.getRangeAt && sel.rangeCount) {
+				range = sel.getRangeAt(0);
+				range.deleteContents();
+				var el = document.createElement("div");
+				el.innerHTML = html;
+				var frag = document.createDocumentFragment(), node = null, lastNode = null;
+				while (node = el.firstChild) {
+					lastNode = frag.appendChild(node);
+				}
+				range.insertNode(frag);
+
+				if (lastNode) {
+					range = range.cloneRange();
+					range.setStartAfter(lastNode);
+					range.collapse(true);
+					sel.removeAllRanges();
+					sel.addRange(range);
+				}
+
+				this.domValueDidChange();
+			}
+		} else if (document.selection && document.selection.type != "Control") {
+			document.selection.createRange().pasteHTML(html);
+			this.domValueDidChange();
+		}
+	},
+
+	insertImage: function(url) {
+		this.insertHtmlHtmlAtCaret('<img src="%@" width="100%" height="auto" />'.fmt(url));
 	},
 
 	/**
