@@ -1,3 +1,8 @@
+// ==========================================================================
+// Project:   SproutCoreWysiwyg Editor
+// Author: Joe Gaudet - joe@learndot.com
+// ==========================================================================
+/*globals SproutCoreWysiwyg */
 /**
  * @class
  * 

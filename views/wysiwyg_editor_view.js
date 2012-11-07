@@ -1,9 +1,9 @@
 // ==========================================================================
-// Framework:   SproutcoreWysiwyg
-// Copyright: @2012 Joe Gaudet - joe@learndot.com.
+// Project:   SproutCoreWysiwyg Editor
+// Author: Joe Gaudet - joe@learndot.com
 // ==========================================================================
-/*globals SC */
-
+/*globals SproutCoreWysiwyg */
+// Framework:   SproutcoreWysiwyg
 /**
  * @class
  * 
@@ -32,8 +32,6 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 
 	frameborder: 0,
 
-	_updateStyles: NO,
-
 	/**
 	 * Whether or not this view uses native scrolling
 	 */
@@ -50,21 +48,22 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 	init: function() {
 		sc_super();
 		this._value = this.get('carriageReturnText');
-		editor = this;
 	},
 
 	/**
 	 * Pointer to the document inside of the iFrame
 	 */
 	document: function() {
-		return this.$()[0].contentDocument;
+		if (!this._document) this._document = this.$()[0].contentDocument;
+		return this._document;
 	}.property(),
 
 	/**
 	 * Pointer to the document inside of the iFrame
 	 */
 	window: function() {
-		return this.$()[0].contentWindow;
+		if (!this._window) this._window = this.$()[0].contentWindow;
+		return this._window;
 	}.property(),
 
 	width: function() {
@@ -75,52 +74,108 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 		return this.get('frame').height;
 	}.property('frame').cacheable(),
 
-	isBold: function() {
-		return this.queryCommandState('bold');
-	}.property('_updateStyles'),
-
-	isItalic: function() {
-		return this.queryCommandState('italic');
-	}.property('_updateStyles'),
-
-	isUnderline: function() {
-		return this.queryCommandState('underline');
-	}.property('_updateStyles'),
-
-	isJustifyLeft: function() {
-		return this.queryCommandState('justifyleft');
-	}.property('_updateStyles'),
-
-	isJustifyCenter: function() {
-		return this.queryCommandState('justifycenter');
-	}.property('_updateStyles'),
-
-	isJustifyRight: function() {
-		return this.queryCommandState('justifyright');
-	}.property('_updateStyles'),
-	
-	isJustifyFull: function() {
-		return this.queryCommandState('justifyFull');
-	}.property('_updateStyles'),
-
-	currentStyle: function() {
-		var style = this.queryCommandValue('formatBlock');
-		return style ? style : 'p';
-	}.property('_updateStyles'),
-
 	/**
-	 * On create of the layer we bind to the iframe load event so we can set up
-	 * our editor
+	 * Executes a command against the iFrame:
+	 * 
+	 * https://developer.mozilla.org/en-US/docs/Rich-Text_Editing_in_Mozilla
+	 * http://msdn.microsoft.com/en-us/library/ms536419(v=vs.85).aspx
+	 * https://dvcs.w3.org/hg/editing/raw-file/tip/editing.html
+	 * 
+	 * @param commandName
+	 * @param showDefaultUI
+	 * @param value
 	 */
-	didCreateLayer: function() {
-		SC.Event.add(this.$(), 'load', this, this.iframeDidLoad);
+	execCommand: function(commandName, showDefaultUI, value) {
+		var ret = this.get('document').execCommand(commandName, showDefaultUI, value);
+		this.domValueDidChange();
+		return ret;
 	},
 
 	/**
-	 * Clean up the load events
+	 * Determines whether or not a commandHasBeen executed at the current
+	 * selection.
+	 * 
+	 * @param commandName
+	 * @returns {Boolean}
 	 */
-	didDestroyLayer: function() {
-		SC.Event.remove(this.$(), 'load', this, this.iframeDidLoad);
+	queryCommandState: function(commandName) {
+		var document = this.get('document');
+		return document && document.queryCommandState(commandName);
+	},
+	/**
+	 * Determines whether or not a commandHasBeen executed at the current
+	 * selection.
+	 * 
+	 * @param commandName
+	 * @returns {Boolean}
+	 */
+	queryCommandValue: function(commandName) {
+		var document = this.get('document');
+		return document && document.queryCommandValue(commandName);
+	},
+
+	insertHtmlHtmlAtCaret: function(html) {
+		var document = this.get('document'), window = this.get('window'), sel, range;
+		if (document.getSelection) {
+			sel = window.getSelection();
+			if (sel.getRangeAt && sel.rangeCount) {
+				range = sel.getRangeAt(0);
+				range.deleteContents();
+				var el = document.createElement("div");
+				el.innerHTML = html;
+				var frag = document.createDocumentFragment(), node = null, lastNode = null;
+				while (node = el.firstChild) {
+					lastNode = frag.appendChild(node);
+				}
+				range.insertNode(frag);
+
+				if (lastNode) {
+					range = range.cloneRange();
+					range.setStartAfter(lastNode);
+					range.collapse(true);
+					sel.removeAllRanges();
+					sel.addRange(range);
+				}
+
+				this.domValueDidChange();
+			}
+		} else if (document.selection && document.selection.type != "Control") {
+			document.selection.createRange().pasteHTML(html);
+			this.domValueDidChange();
+		}
+	},
+
+	/**
+	 * Reformats
+	 * 
+	 * @param $element
+	 * @param tagName
+	 * @returns
+	 */
+	_formatElement: function($element, tagName) {
+		var newElement = $('<' + tagName + '/>').append($element.clone().get(0).childNodes);
+		$element.replaceWith(newElement);
+		return newElement;
+	},
+
+	/**
+	 * Selects the provided element in the views iFrame
+	 * 
+	 * @param $element
+	 */
+	_selectElement: function($element) {
+		var contentWindow = this.get('window');
+		if (contentWindow.getSelection) {
+			var sel = contentWindow.getSelection();
+			sel.removeAllRanges();
+			var range = document.createRange();
+			range.selectNodeContents($element[0]);
+			sel.addRange(range);
+		} else if (contentWindow.document.selection) {
+			var textRange = contentWindow.document.body.createTextRange();
+			textRange.moveToElementText($element[0]);
+			textRange.select();
+		}
 	},
 
 	_value: '',
@@ -150,7 +205,21 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 		// get the value from the inner document
 		this._changeByEditor = true;
 		this.set('value', this.get('document').body.innerHTML);
-		this.notifyPropertyChange('_updateStyles');
+	},
+
+	/**
+	 * On create of the layer we bind to the iframe load event so we can set up
+	 * our editor
+	 */
+	didCreateLayer: function() {
+		SC.Event.add(this.$(), 'load', this, this.iframeDidLoad);
+	},
+
+	/**
+	 * Clean up the load events
+	 */
+	didDestroyLayer: function() {
+		SC.Event.remove(this.$(), 'load', this, this.iframeDidLoad);
 	},
 
 	/**
@@ -158,6 +227,7 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 	 * compatibility sexiness
 	 */
 	_setupEvents: function() {
+		console.log('select element');
 		// handle basic events
 		var window = this.get('window');
 
@@ -231,28 +301,20 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 
 	mouseUp: function(evt) {
 		evt.allowDefault();
-		this.notifyPropertyChange('_updateStyles');
 		return YES;
 	},
 
 	// TODO: This is a mess -- needs to have more well partitioned
 	// responsibilities
 	keyUp: function(evt) {
-
 		var doc = this.get('document');
 		// we don't allow regular returns because they are
 		// divs we want paragraphs
 		if (evt.keyCode === SC.Event.KEY_RETURN) {
-			var node = doc.getSelection().anchorNode;
-			// if this carriage return inserted a div
-			// lets reformat it to a paragraph
-			if (node.nodeName === "DIV") {
-				var el = this._formatElement($(node), 'p');
-				this._selectElement(el);
+			if (this.queryCommandValue('formatBlock') === 'div') {
+				this.execCommand('formatBlock', null, 'p');
 			}
 		}
-
-		this.domValueDidChange();
 
 		// if we don't use native scrolling we need to update the frame size
 		// based on doc size.
@@ -269,8 +331,8 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 			var calcHeight = lastNode.offset().top + lastNode.height();
 			this.adjust('height', Math.max(calcHeight, this.get('minHeight')));
 		}
-		this.notifyPropertyChange('_updateStyles');
-		evt.allowDefault();
+
+		this.domValueDidChange();
 
 		return YES;
 	},
@@ -278,121 +340,6 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 	keyDown: function(evt) {
 		evt.allowDefault();
 		return YES;
-	},
-
-	focus: function() {
-		this.becomeFirstResponder();
-	},
-
-	blur: function() {
-		this.resignFirstResponder();
-	},
-
-	/**
-	 * Executes a command against the iFrame:
-	 * 
-	 * https://developer.mozilla.org/en-US/docs/Rich-Text_Editing_in_Mozilla
-	 * http://msdn.microsoft.com/en-us/library/ms536419(v=vs.85).aspx
-	 * https://dvcs.w3.org/hg/editing/raw-file/tip/editing.html
-	 * 
-	 * @param commandName
-	 * @param showDefaultUI
-	 * @param value
-	 */
-	execCommand: function(commandName, showDefaultUI, value) {
-		this.get('document').execCommand(commandName, showDefaultUI, value);
-		this.domValueDidChange();
-	},
-
-	/**
-	 * Determines whether or not a commandHasBeen executed at the current
-	 * selection.
-	 * 
-	 * @param commandName
-	 * @returns {Boolean}
-	 */
-	queryCommandState: function(commandName) {
-		var document = this.get('document');
-		return document && document.queryCommandState(commandName);
-	},
-	/**
-	 * Determines whether or not a commandHasBeen executed at the current
-	 * selection.
-	 * 
-	 * @param commandName
-	 * @returns {Boolean}
-	 */
-	queryCommandValue: function(commandName) {
-		var document = this.get('document');
-		return document && document.queryCommandValue(commandName);
-	},
-
-	insertHtmlHtmlAtCaret: function(html) {
-		var document = this.get('document'), window = this.get('window'), sel, range;
-		if (document.getSelection) {
-			sel = window.getSelection();
-			if (sel.getRangeAt && sel.rangeCount) {
-				range = sel.getRangeAt(0);
-				range.deleteContents();
-				var el = document.createElement("div");
-				el.innerHTML = html;
-				var frag = document.createDocumentFragment(), node = null, lastNode = null;
-				while (node = el.firstChild) {
-					lastNode = frag.appendChild(node);
-				}
-				range.insertNode(frag);
-
-				if (lastNode) {
-					range = range.cloneRange();
-					range.setStartAfter(lastNode);
-					range.collapse(true);
-					sel.removeAllRanges();
-					sel.addRange(range);
-				}
-
-				this.domValueDidChange();
-			}
-		} else if (document.selection && document.selection.type != "Control") {
-			document.selection.createRange().pasteHTML(html);
-			this.domValueDidChange();
-		}
-	},
-
-	insertImage: function(url) {
-		this.insertHtmlHtmlAtCaret('<img src="%@" width="100%" height="auto" />'.fmt(url));
-	},
-
-	/**
-	 * Reformats
-	 * 
-	 * @param $element
-	 * @param tagName
-	 * @returns
-	 */
-	_formatElement: function($element, tagName) {
-		var newElement = $('<' + tagName + '/>').append($element.clone().get(0).childNodes);
-		$element.replaceWith(newElement);
-		return newElement;
-	},
-
-	/**
-	 * Selects the provided element in the views iFrame
-	 * 
-	 * @param $element
-	 */
-	_selectElement: function($element) {
-		var contentWindow = this.get('window');
-		if (contentWindow.getSelection) {
-			var sel = contentWindow.getSelection();
-			sel.removeAllRanges();
-			var range = document.createRange();
-			range.selectNodeContents($element[0]);
-			sel.addRange(range);
-		} else if (contentWindow.document.selection) {
-			var textRange = contentWindow.document.body.createTextRange();
-			textRange.moveToElementText($element[0]);
-			textRange.select();
-		}
 	}
 
 });

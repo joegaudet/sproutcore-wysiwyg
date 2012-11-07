@@ -1,7 +1,6 @@
 @import "compass/css3";
 
-
-$theme.sc-wysiwyg-toolbar {
+$theme.sc-wysiwyg-toolbar, $theme.sc-wysiwyg-segmented {
 
 	.bold {
 		width: 12px;
@@ -86,6 +85,24 @@ $theme.sc-wysiwyg-toolbar {
 		width: 14px;
 		height: 14px;
 		@include slice("../images/icons/link.png");
+	}
+	
+	.embed-video {
+		width: 14px;
+		height: 17px;
+		@include slice("../images/icons/film.png");
+	}
+	
+	.vimeo {
+		width: 15px;
+		height: 15px;
+		@include slice("../images/icons/vimeo.png");
+	}
+	
+	.youtube {
+		width: 15px;
+		height: 15px;
+		@include slice("../images/icons/youtube.png");
 	}
 
 }

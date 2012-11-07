@@ -1,8 +1,8 @@
 // ==========================================================================
-// Project:   SproutcoreWysiwyg Strings
-// Copyright: @2012 My Company, Inc.
+// Project:   SproutCoreWysiwyg Editor
+// Author: Joe Gaudet - joe@learndot.com
 // ==========================================================================
-/*globals SproutcoreWysiwyg */
+/*globals SproutCoreWysiwyg */
 
 // Place strings you want to localize here.  In your app, use the key and
 // localize it using "key string".loc().  HINT: For your key names, use the

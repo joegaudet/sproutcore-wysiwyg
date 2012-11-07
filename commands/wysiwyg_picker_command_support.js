@@ -3,8 +3,14 @@
 // Author: Joe Gaudet - joe@learndot.com
 // ==========================================================================
 /*globals SproutCoreWysiwyg */
-SC.WYSIWYGLabelView = SC.LabelView.extend({
-	classNames: 'sc-wysiwyg-text',
-	escapeHTML: NO
-	
-});
+SC.WYSIWYGPickerCommandSupport = {
+
+	pickerPane: null,
+
+	_popup: function(anchor, controller) {
+		if (this.pickerPane) this.pickerPane.create({
+			controller: controller,
+			command: this
+		}).popup(anchor, SC.PICKER_POINTER, [ 2, 3, 0, 1, 2 ]);
+	}
+};

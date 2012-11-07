@@ -1,8 +1,13 @@
+// ==========================================================================
+// Project:   SproutCoreWysiwyg Editor
+// Author: Joe Gaudet - joe@learndot.com
+// ==========================================================================
+/*globals SproutCoreWysiwyg */
+sc_require('delegates/wysiwyg_toolbar_view_delegate');
+
 SC.WYSIWYGToolbarView = SC.ToolbarView.extend(SC.WYSIWYGToolbarViewDelegate, SC.FlowedLayout, {
 
 	classNames: 'sc-wysiwyg-toolbar',
-
-	wysiwygView: null,
 
 	controller: null,
 
@@ -52,7 +57,7 @@ SC.WYSIWYGToolbarView = SC.ToolbarView.extend(SC.WYSIWYGToolbarViewDelegate, SC.
 
 		escapeHTML: NO,
 
-		currentStyleBinding: SC.Binding.oneWay('.parentView.currentStyle'),
+		currentStyleBinding: SC.Binding.oneWay('.parentView.controller.currentStyle'),
 		currenStyleDidChange: function() {
 			this._ignoreChange = true;
 			this.set('value', this.get('currentStyle'));
@@ -61,11 +66,9 @@ SC.WYSIWYGToolbarView = SC.ToolbarView.extend(SC.WYSIWYGToolbarViewDelegate, SC.
 		valueDidChange: function() {
 			var value = this.get('value');
 			if (value && !this._ignoreChange) {
-				this.command = {
-					action: 'formatBlock',
-					argument: '<%@>'.fmt(value.toUpperCase())
-				};
-				this.getPath('parentView.wysiwygView').executeCommand(this);
+				this.command.set('argument', '<%@>'.fmt(value.toUpperCase()));
+				var controller = this.getPath('parentView.controller');
+				if (controller) controller.invokeCommand(this);
 			}
 			this._ignoreChange = false;
 		}.observes('value'),
