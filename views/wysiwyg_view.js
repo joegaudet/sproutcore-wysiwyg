@@ -171,6 +171,7 @@ SC.WYSIWYGView = SC.View.extend({
 		isJustifyLeftBinding: SC.Binding.oneWay('.wysiwygView.editor.isJustifyLeft'),
 		isJustifyCenterBinding: SC.Binding.oneWay('.wysiwygView.editor.isJustifyCenter'),
 		isJustifyRightBinding: SC.Binding.oneWay('.wysiwygView.editor.isJustifyRight'),
+		isJustifyFullBinding: SC.Binding.oneWay('.wysiwygView.editor.isJustifyFull'),
 		currentStyleBinding: SC.Binding.oneWay('.wysiwygView.editor.currentStyle'),
 	}),
 

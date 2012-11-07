@@ -1,10 +1,10 @@
-SC.WYSIWYGToolbarView = SC.ToolbarView.extend(SC.FlowedLayout, {
+SC.WYSIWYGToolbarView = SC.ToolbarView.extend(SC.WYSIWYGToolbarViewDelegate, SC.FlowedLayout, {
 
 	classNames: 'sc-wysiwyg-toolbar',
 
 	wysiwygView: null,
 
-	buttons: [ 'styles', 'insertImage', 'embed', 'link', 'bold', 'italic', 'underline', 'insertOrderedList', 'insertUnorderedList', 'justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull', 'indent', 'outdent' ],
+	controller: null,
 
 	flowPadding: {
 		top: 4,
@@ -18,43 +18,16 @@ SC.WYSIWYGToolbarView = SC.ToolbarView.extend(SC.FlowedLayout, {
 
 	anchorLocation: SC.ANCHOR_TOP,
 
-	buttonHeight: 24,
-
 	init: function() {
-		this._initButtons();
 		sc_super();
+		this.invokeDelegateMethod(this.get('viewDelegate'), 'initButtons');
 	},
 
-	_initButtons: function() {
-		var self = this, childViews = this.childViews.copy(), buttonHeight = self.get('buttonHeight');
+	delegate: null,
 
-		// Add the default buttons
-
-		this.buttons.forEach(function(button) {
-			var buttonClass = self[button], command = SproutCoreWysiwyg.commands[button];
-
-			if (!buttonClass) buttonClass = SC.ButtonView;
-
-			if (buttonClass === SC.ButtonView) {
-				self[button] = buttonClass.extend({
-					layout: {
-						height: buttonHeight,
-						width: 30
-					},
-					icon: command.get('icon'),
-					command: command,
-					toolTip: command.get('toolTip'),
-					action: 'executeCommand',
-					target: SC.outlet('parentView.wysiwygView'),
-					keyEquivalent: command.get('keyEquivalent'),
-					isSelectedBinding: SC.Binding.oneWay('.parentView.is' + button.capitalize())
-				});
-			}
-
-			childViews.push(button);
-		});
-		this.childViews = childViews;
-	},
+	viewDelegate: function() {
+		return this.delegateFor('isWYSIWYGToolbarViewDelegate', this.get('delegate'));
+	}.property('_viewDelegate'),
 
 	styles: SC.SelectView.extend({
 
