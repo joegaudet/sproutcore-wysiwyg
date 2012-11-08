@@ -2,6 +2,8 @@
 
 A basic WYSIWYG editor for SproutCore.
 
+![ScreenShot](https://raw.github.com/joegaudet/sproutcore-wysiwyg/master/screen-shot.png)
+
 ## Features
 
 - Basic WYSIWYG editing (bold, italic, underline, ul, ol, alignment, indenting, linking, block formating)
