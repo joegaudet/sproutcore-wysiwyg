@@ -22,27 +22,46 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 /** @scope SC.WYSIWYGEditorView.prototype */
 {
 
-	acceptsFirstResponder: YES,
-
 	classNames: 'sc-wysiwyg-editor',
-
-	attributeBindings: [ 'frameborder', 'width', 'height', 'scrolling' ],
 
 	tagName: 'iframe',
 
+	/**
+	 * bind the tag attributes to the the following properties
+	 */
+	attributeBindings: [ 'frameborder', 'width', 'height', 'scrolling' ],
+
+	/**
+	 * Cause it's ugly.
+	 */
 	frameborder: 0,
 
 	/**
-	 * Whether or not this view uses native scrolling
+	 * @property {Number} used to map the width of the frame to the width of the
+	 *           iframe keeping them consistent
 	 */
-	useNativeScrolling: NO,
+	width: function() {
+		return this.get('frame').width;
+	}.property('frame').cacheable(),
 
-	scrolling: function() {
-		return this.get('useNativeScrolling') ? 'yes' : 'no';
-	}.property('useNativeScrolling'),
+	/**
+	 * @property {Number} used to map the height of the frame to the width of
+	 *           the iframe keeping them consistent
+	 */
+	height: function() {
+		return this.get('frame').height;
+	}.property('frame').cacheable(),
 
+	scrolling: 'no',
+
+	/**
+	 * Min height of the frame
+	 */
 	minHeight: 200,
 
+	/**
+	 * Text to be entered on a carraige return
+	 */
 	carriageReturnText: '<p><br /></p>',
 
 	init: function() {
@@ -51,28 +70,20 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 	},
 
 	/**
-	 * Pointer to the document inside of the iFrame
-	 */
-	document: function() {
-		if (!this._document) this._document = this.$()[0].contentDocument;
-		return this._document;
-	}.property(),
-
-	/**
-	 * Pointer to the document inside of the iFrame
+	 * Pointer to the window inside of the iFrame
 	 */
 	window: function() {
 		if (!this._window) this._window = this.$()[0].contentWindow;
 		return this._window;
 	}.property(),
 
-	width: function() {
-		return this.get('frame').width;
-	}.property('frame').cacheable(),
-
-	height: function() {
-		return this.get('frame').height;
-	}.property('frame').cacheable(),
+	/**
+	 * Pointer to the document inside of the iFrame
+	 */
+	document: function() {
+		if (!this._document) this._document = this.$()[0].contentDocument;
+		return this._document;
+	}.property(),
 
 	/**
 	 * Executes a command against the iFrame:
@@ -87,7 +98,7 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 	 */
 	execCommand: function(commandName, showDefaultUI, value) {
 		var ret = this.get('document').execCommand(commandName, showDefaultUI, value);
-		this.domValueDidChange();
+		this._domValueDidChange();
 		return ret;
 	},
 
@@ -114,6 +125,12 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 		return document && document.queryCommandValue(commandName);
 	},
 
+	/**
+	 * Insert some html at the current caret position
+	 * 
+	 * @param html
+	 *            {String} html to be inserted
+	 */
 	insertHtmlHtmlAtCaret: function(html) {
 		var document = this.get('document'), window = this.get('window'), sel, range;
 		if (document.getSelection) {
@@ -137,11 +154,11 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 					sel.addRange(range);
 				}
 
-				this.domValueDidChange();
+				this._domValueDidChange();
 			}
 		} else if (document.selection && document.selection.type != "Control") {
 			document.selection.createRange().pasteHTML(html);
-			this.domValueDidChange();
+			this._domValueDidChange();
 		}
 	},
 
@@ -150,6 +167,7 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 	 * 
 	 * @param $element
 	 * @param tagName
+	 * @private
 	 * @returns
 	 */
 	_formatElement: function($element, tagName) {
@@ -162,6 +180,7 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 	 * Selects the provided element in the views iFrame
 	 * 
 	 * @param $element
+	 * @private
 	 */
 	_selectElement: function($element) {
 		var contentWindow = this.get('window');
@@ -180,8 +199,17 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 
 	_value: '',
 
+	/**
+	 * Whether or not the value has been changed by the editor
+	 * 
+	 * @property {Boolean}
+	 * @private
+	 */
 	_changeByEditor: false,
 
+	/**
+	 * @property {String} html document inside of the editor
+	 */
 	value: function(key, value) {
 		if (value !== undefined) {
 			// SET
@@ -201,7 +229,10 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 		return value;
 	}.property().idempotent(),
 
-	domValueDidChange: function() {
+	/**
+	 * @private notify the dom that values have been updated.
+	 */
+	_domValueDidChange: function() {
 		// get the value from the inner document
 		this._changeByEditor = true;
 		this.set('value', this.get('document').body.innerHTML);
@@ -212,22 +243,24 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 	 * our editor
 	 */
 	didCreateLayer: function() {
-		SC.Event.add(this.$(), 'load', this, this.iframeDidLoad);
+		SC.Event.add(this.$(), 'load', this, this._iframeDidLoad);
 	},
 
 	/**
 	 * Clean up the load events
 	 */
 	didDestroyLayer: function() {
-		SC.Event.remove(this.$(), 'load', this, this.iframeDidLoad);
+		SC.Event.remove(this.$(), 'load', this, this._iframeDidLoad);
+		this._teardownEvents();
 	},
 
 	/**
 	 * We need to attach the iFrame to the RootResponder for maximum SC
 	 * compatibility sexiness
+	 * 
+	 * @private
 	 */
 	_setupEvents: function() {
-		console.log('select element');
 		// handle basic events
 		var window = this.get('window');
 
@@ -246,6 +279,11 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 		}
 	},
 
+	/**
+	 * Tear down the events that we added at init
+	 * 
+	 * @private
+	 */
 	_teardownEvents: function() {
 		var window = this.get('window');
 
@@ -259,7 +297,14 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 		}
 	},
 
-	iframeDidLoad: function(evt) {
+	/**
+	 * Called once the internal iframe has loaded, sets the document to editor
+	 * mode.
+	 * 
+	 * @private
+	 * @param evt
+	 */
+	_iframeDidLoad: function(evt) {
 		var doc = this.get('document');
 		if (!doc) return;
 		docu = doc;
@@ -291,7 +336,7 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 	},
 
 	mouseWheel: function(evt) {
-		return this.get('useNativeScrolling');
+		return NO;
 	},
 
 	mouseDown: function(evt) {
@@ -318,21 +363,19 @@ SC.WYSIWYGEditorView = SC.View.extend(SC.Control,
 
 		// if we don't use native scrolling we need to update the frame size
 		// based on doc size.
-		if (!this.get('useNativeScrolling')) {
-			// this could probably be done better
-			var lastNode = SC.$(doc.body).children().last();
-			// if we've deleted all of those nodes. lets put the empty one
-			// in
-			if (lastNode.length === 0) {
-				SC.$(doc.body).html(this.get('carriageReturnText'));
-				lastNode = SC.$(doc.body).children().last();
-				this.domValueDidChange();
-			}
-			var calcHeight = lastNode.offset().top + lastNode.height();
-			this.adjust('height', Math.max(calcHeight, this.get('minHeight')));
+		// this could probably be done better
+		var lastNode = SC.$(doc.body).children().last();
+		// if we've deleted all of those nodes. lets put the empty one
+		// in
+		if (lastNode.length === 0) {
+			SC.$(doc.body).html(this.get('carriageReturnText'));
+			lastNode = SC.$(doc.body).children().last();
+			this._domValueDidChange();
 		}
+		var calcHeight = lastNode.offset().top + lastNode.height();
+		this.adjust('height', Math.max(calcHeight, this.get('minHeight')));
 
-		this.domValueDidChange();
+		this._domValueDidChange();
 
 		return YES;
 	},

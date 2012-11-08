@@ -3,31 +3,35 @@
 // Author: Joe Gaudet - joe@learndot.com
 // ==========================================================================
 /*globals SproutCoreWysiwyg */
+sc_require('views/wysiwyg_select_view');
+
+/**
+ * @class
+ * 
+ * Responsible for creating toolbar controls for command objects
+ */
 SC.WYSIWYGToolbarViewDelegate = {
 
 	isWYSIWYGToolbarViewDelegate: YES,
 
-	buttonHeight: 24,
-
-	buttons: [ 'styles', 'insertImage', 'embedVideo', 'link', 'bold', 'italic', 'underline', 'insertOrderedList', 'insertUnorderedList', 'justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull', 'indent', 'outdent' ],
+	controlHeight: 24,
 
 	controller: null,
 
-	initButtons: function() {
-		// Add the default buttons
-		var buttons = this.get('buttons');
-		for ( var i = 0; i < buttons.length; i++) {
-			var button = buttons[i], command = SC.WYSIWYGCommandFactory.commandFor(button);
-			var view = command ? this.buttonForCommand(button, command) : this[button];
-			if (view) {
-				view = this[button] = this.createChildView(view);
-				this.childViews.push(view);
-			}
+	toolbarViewCreateControlForCommandNamed: function(toolbarView, commandName) {
+		var command = SC.WYSIWYGCommandFactory.commandFor(commandName);
+		var controlView = command ? this.toolbarViewButtonForCommand(toolbarView, commandName, command) : this[commandName];
+		if (controlView) {
+			controlView = this[commandName] = toolbarView.createChildView(controlView);
+			controlView.adjust('height', this.get('controlHeight'));
+		} else {
+			SC.error('WYSIWYGToolbarViewDelegate: Could not createView: ' + commandName + ' no class was found.');
 		}
+		return controlView;
 	},
 
-	buttonForCommand: function(key, command) {
-		var buttonClass = this[key], buttonHeight = this.get('buttonHeight');
+	toolbarViewButtonForCommand: function(toolbarView, key, command) {
+		var buttonClass = this[key];
 		if (buttonClass) {
 			buttonClass = buttonClass.extend({
 				command: command
@@ -35,7 +39,6 @@ SC.WYSIWYGToolbarViewDelegate = {
 		} else {
 			buttonClass = this.get('exampleView').extend({
 				layout: {
-					height: buttonHeight,
 					width: 30
 				},
 				icon: command.get('icon'),
@@ -44,7 +47,7 @@ SC.WYSIWYGToolbarViewDelegate = {
 				action: 'invokeCommand',
 				target: this,
 				keyEquivalent: command.get('keyEquivalent'),
-				isSelectedBinding: SC.Binding.oneWay('.parentView.controller.is' + command.action.classify())
+				isSelectedBinding: SC.Binding.oneWay('.parentView.controller.is' + command.commandName.classify())
 			});
 		}
 		return buttonClass;
@@ -54,7 +57,14 @@ SC.WYSIWYGToolbarViewDelegate = {
 		this.get('controller').invokeCommand(source);
 	},
 
-	exampleView: SC.ButtonView.extend({
+	/**
+	 * @property {SC.WYSIWYGSelectView} default control for handling paragraph
+	 *           styles (p, h1, h2 etc)
+	 */
+	styles: SC.WYSIWYGSelectView,
 
-	})
+	/**
+	 * @property {SC.ButtonView) default control for handling commands.
+	 */
+	exampleView: SC.ButtonView
 };

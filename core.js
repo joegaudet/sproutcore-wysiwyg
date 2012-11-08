@@ -4,19 +4,12 @@
 // ==========================================================================
 /*globals SC */
 sc_require('wysiwyg_command');
-/**
- * @namespace
- * 
- * My cool new framework. Describe your framework.
- * 
- * @extends SC.Object
- */
 SproutCoreWysiwyg = SC.Object.create(
 /** @scope SproutcoreWysiwyg.prototype */
 {
 
 	NAMESPACE: 'SproutcoreWysiwyg',
-	VERSION: '0.1.0',
+	VERSION: '1.0.0',
 
 	styles: [ {
 		title: 'Paragraph',

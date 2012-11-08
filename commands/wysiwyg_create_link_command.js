@@ -4,13 +4,20 @@
 // ==========================================================================
 /*globals SproutCoreWysiwyg */
 sc_require('commands/wysiwyg_command');
-sc_require('commands/wysiwyg_command_factory');
 sc_require('commands/wysiwyg_picker_command_support');
 sc_require('panes/wysiwyg_link_picker_pane');
 
-SC.WYSIWYGCreateLinkCommand = SC.WYSIWYGCommand.extend(SC.WYSIWYGPickerCommandSupport, {
+/**
+ * @class
+ * 
+ * Creates a with the current selection at the url entered by the user via the
+ * pickerPane
+ * 
+ * TODO: Add support for changing the link
+ */
+SC.WYSIWYGCreateLinkCommand = SC.Object.extend(SC.WYSIWYGCommand, SC.WYSIWYGPickerCommandSupport, {
 
-	action: 'createLink',
+	commandName: 'link',
 
 	url: '',
 
@@ -29,4 +36,4 @@ SC.WYSIWYGCreateLinkCommand = SC.WYSIWYGCommand.extend(SC.WYSIWYGPickerCommandSu
 	}
 
 });
-SC.WYSIWYGCommandFactory.registerCommand('link', SC.WYSIWYGCreateLinkCommand);
+SC.WYSIWYGCommandFactory.registerCommand(SC.WYSIWYGCreateLinkCommand);

@@ -3,7 +3,16 @@
 // Author: Joe Gaudet - joe@learndot.com
 // ==========================================================================
 /*globals SproutCoreWysiwyg */
+
+/**
+ * @class
+ * 
+ * Provides a facade for binding to properties and interacting with the editor
+ * window.
+ */
 SC.WYSIWYGController = SC.Object.extend({
+
+	commands: [],
 
 	editor: null,
 

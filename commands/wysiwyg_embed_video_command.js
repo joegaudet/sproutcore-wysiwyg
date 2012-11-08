@@ -7,10 +7,20 @@ sc_require('commands/wysiwyg_command');
 sc_require('commands/wysiwyg_picker_command_support');
 sc_require('panes/wysiwyg_video_picker_pane');
 
-SC.WYSIWYGEmbedVideoCommand = SC.WYSIWYGCommand.extend(SC.WYSIWYGPickerCommandSupport, {
+/**
+ * @class
+ * 
+ * Embeds a Youtube or Vimeo link at the current location
+ * 
+ * TODO: Add a PILE of validation
+ */
+SC.WYSIWYGEmbedVideoCommand = SC.Object.extend(SC.WYSIWYGCommand, SC.WYSIWYGPickerCommandSupport, {
 
-	action: 'embedVideo',
+	commandName: 'embedVideo',
 
+	/**
+	 * @property {String} URL of the video to be embeded
+	 */
 	url: '',
 
 	type: 'youtube',
@@ -44,4 +54,4 @@ SC.WYSIWYGEmbedVideoCommand = SC.WYSIWYGCommand.extend(SC.WYSIWYGPickerCommandSu
 	}
 
 });
-SC.WYSIWYGCommandFactory.registerCommand('embedVideo', SC.WYSIWYGEmbedVideoCommand);
+SC.WYSIWYGCommandFactory.registerCommand(SC.WYSIWYGEmbedVideoCommand);

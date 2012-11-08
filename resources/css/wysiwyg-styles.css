@@ -1,5 +1,9 @@
 @import "compass/css3";
 
+/*
+ *	The CSS that is applied to the actual wysiwyg view
+ *  and the output content.
+ */
 $theme.sc-label-view.sc-wysiwyg-text, body.sc-wysiwyg {
 	word-wrap:break-word;
 	font-family: Helvetica, Arial, sans-serif;
@@ -9,33 +13,30 @@ $theme.sc-label-view.sc-wysiwyg-text, body.sc-wysiwyg {
 	font-size: 18px;
 	line-height: 25px;
 	
+	.smoothed {
+		-webkit-font-smoothing: antialiased;
+		font-smoothing: antialiased;
+		font-smooth: always;
+	}
+	
+	
     a {
-        font-weight: bold;
-        color: #4182bf;
+        color: #3b74d5;
         
         &:hover {
-            color: #4182bf;
+            color: #3b74d5;
             cursor: pointer;
         }
         
         &:active {
-            color: #4182bf;
+            color: #3b74d5;
             cursor: pointer;
         }
         
         &:visited {
-            color: #4182bf; 
+            color: #3b74d5; 
         }
     }
-	    
-	// markdown classes
-	* {
-		white-space: normal;
-	}
-	
-	em {
-		font-style: italic;
-	}
 	
 	h1 {
 		@extend .smoothed;
@@ -73,13 +74,14 @@ $theme.sc-label-view.sc-wysiwyg-text, body.sc-wysiwyg {
 		font-size: 14px;
 	}
 	
+	// div is included because they are momentarily 
+	// inserted before we reformat them as p
 	p, div {
 		margin-bottom: 15px;
 	}
 
 	pre {
 		margin-bottom: 10px;
-		overflow: auto;
 	}
 
 	ul {

@@ -7,21 +7,27 @@ sc_require('commands/wysiwyg_command');
 sc_require('commands/wysiwyg_picker_command_support');
 sc_require('panes/wysiwyg_image_picker_pane');
 
-SC.WYSIWYGInsertImageCommand = SC.WYSIWYGCommand.extend(SC.WYSIWYGPickerCommandSupport, {
+/**
+ * @class
+ * 
+ * Inserts an image at the current location
+ * 
+ * TODO: Support Image size
+ */
+SC.WYSIWYGInsertImageCommand = SC.Object.extend(SC.WYSIWYGCommand, SC.WYSIWYGPickerCommandSupport, {
 
-	action: 'insertImage',
+	commandName: 'insertImage',
 
+	/**
+	 * @property {String} URL the image to be inserted
+	 */
 	url: '',
 
 	pickerPane: SC.WYSIWYGImagePickerPane,
-
-	execute: function(source, controller) {
-		this._popup(source, controller);
-	},
 
 	commitCommand: function(controller) {
 		controller.execCommand('insertImage', false, this.get('url'));
 	}
 
 });
-SC.WYSIWYGCommandFactory.registerCommand('insertImage', SC.WYSIWYGInsertImageCommand);
+SC.WYSIWYGCommandFactory.registerCommand(SC.WYSIWYGInsertImageCommand);

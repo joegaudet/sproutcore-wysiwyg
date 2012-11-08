@@ -30,9 +30,12 @@ SC.WYSIWYGView = SC.View.extend({
 
 	value: '',
 
+	commands: [ 'styles', 'insertImage', 'embedVideo', 'link', 'bold', 'italic', 'underline', 'insertOrderedList', 'insertUnorderedList', 'justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull', 'indent', 'outdent' ],
+
 	init: function() {
 		sc_super();
 		this.controller = this.controllerClass.create({
+			commands: this.get('commands'),
 			editor: this.get('editor')
 		});
 	},
@@ -85,7 +88,7 @@ SC.WYSIWYGView = SC.View.extend({
 			}).oneWay('.parentView.parentView.frame'),
 
 			/**
-			 * Extended to support
+			 * Extended to support scrolling of the resized frame
 			 */
 			keyUp: function(evt) {
 				var ret = sc_super();

@@ -1,5 +1,9 @@
 @import "compass/css3";
 
+
+/*
+ *	Command toolbar icons, retina ready. Need some polishing.
+ */
 $theme.sc-wysiwyg-toolbar, $theme.sc-wysiwyg-segmented {
 
 	.bold {
@@ -81,7 +85,7 @@ $theme.sc-wysiwyg-toolbar, $theme.sc-wysiwyg-segmented {
 		@include slice("../images/icons/embed.png");
 	}
 	
-	.create-link {
+	.link {
 		width: 14px;
 		height: 14px;
 		@include slice("../images/icons/link.png");

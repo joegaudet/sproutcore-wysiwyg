@@ -23,65 +23,23 @@ SC.WYSIWYGToolbarView = SC.ToolbarView.extend(SC.WYSIWYGToolbarViewDelegate, SC.
 
 	anchorLocation: SC.ANCHOR_TOP,
 
-	init: function() {
-		sc_super();
-		this.invokeDelegateMethod(this.get('viewDelegate'), 'initButtons');
-	},
+	commandsBinding: SC.Binding.oneWay('*controller.commands'),
+
+	commandsDidChange: function() {
+		var commands = this.get('commands');
+		for ( var i = 0; i < commands.length; i++) {
+			var view = this.invokeDelegateMethod(this.get('viewDelegate'), 'toolbarViewCreateControlForCommandNamed', this, commands[i]);
+			if (view) {
+				this.childViews.push(view);
+				this.appendChild(view);
+			}
+		}
+	}.observes('commands'),
 
 	delegate: null,
 
 	viewDelegate: function() {
 		return this.delegateFor('isWYSIWYGToolbarViewDelegate', this.get('delegate'));
-	}.property('_viewDelegate'),
-
-	styles: SC.SelectView.extend({
-
-		/**
-		 * Prevent this field from stealing focus from the toolber
-		 */
-		acceptsFirstResponder: NO,
-
-		isDefaultPosition: YES,
-
-		layout: {
-			width: 120,
-			height: 24
-		},
-
-		itemTitleKey: 'title',
-		itemValueKey: 'value',
-
-		items: SproutCoreWysiwyg.styles.map(function(values) {
-			return SC.Object.create(values);
-		}),
-
-		escapeHTML: NO,
-
-		currentStyleBinding: SC.Binding.oneWay('.parentView.controller.currentStyle'),
-		currenStyleDidChange: function() {
-			this._ignoreChange = true;
-			this.set('value', this.get('currentStyle'));
-		}.observes('currentStyle'),
-
-		valueDidChange: function() {
-			var value = this.get('value');
-			if (value && !this._ignoreChange) {
-				this.command.set('argument', '<%@>'.fmt(value.toUpperCase()));
-				var controller = this.getPath('parentView.controller');
-				if (controller) controller.invokeCommand(this);
-			}
-			this._ignoreChange = false;
-		}.observes('value'),
-
-		exampleView: SC.MenuItemView.extend({
-			escapeHTML: NO,
-			classNames: 'sc-wysiwyg-menu-item'
-		}),
-
-		_action: function() {
-			sc_super();
-			this.menu.adjust('width', 190);
-		}
-	})
+	}.property('delegate')
 
 });
