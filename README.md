@@ -4,11 +4,11 @@ A basic WYSIWYG editor for SproutCore.
 
 ## Features
 
-- Basic WYSIWYG editing (bold, italic, undeline, ul, ol, alignment, indenting, linking, block formating)
+- Basic WYSIWYG editing (bold, italic, underline, ul, ol, alignment, indenting, linking, block formating)
 - Basic image inserting
 - Basic video (youtube/vimeo) embeding
 - Compatible with the SC view layer (unlike all other editors)
-- Exensible
+- Extensible
 
 ## Basic Usage
 You can add the SproutCore WYSIWYG to your existing views the same as you would any control:
@@ -22,7 +22,7 @@ You can add the SproutCore WYSIWYG to your existing views the same as you would 
 	})
 
 ## Specifying Commands 
-To specify which commands you would like to be available inside the toolbar by naming them in the commands list.
+To specify which commands you would like to be available inside the toolbar, simply add them to the commands list.
 
 	MYApp.MyView = SC.View.extend({
 		childViews: ['editor'],
@@ -34,7 +34,7 @@ To specify which commands you would like to be available inside the toolbar by n
 	})
 
 ## Add Commands
-To create a custom command, create an object which mixes in the SC.WYSIWYGCommand mixin and add it to the command factory.
+To create a custom command, create an object which mixes in SC.WYSIWYGCommand and add it to the command factory.
 
 	MyApp.MyCommand = SC.Object.extend(SC.WYSIWYGCommand, {
 		commandName: 'myMagicCommand',
@@ -44,7 +44,7 @@ To create a custom command, create an object which mixes in the SC.WYSIWYGComman
 	});
 	SC.WYSIWYGCommandFactory.registerCommand(MyApp.MyCommand);
 
-Once it is registered with the command factory, you can simply add it to the command list when using the WYSIWYGView.
+Once it is registered with the command factory, you can simply add it to the command list in the WYSIWYGView.
 
 	MYApp.MyView = SC.View.extend({
 		childViews: ['editor'],
